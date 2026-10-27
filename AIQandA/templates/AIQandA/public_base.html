@@ -1,0 +1,71 @@
+{% load static %}
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}登录{% endblock %} · EduXJY</title>
+  <link rel="stylesheet" href="{% static 'AIQandA/css/app.css' %}">
+</head>
+<body class="public-body">
+  <main class="login-shell">
+    <section class="login-story">
+      <div class="brand brand-on-dark">
+        <span class="brand-mark">知</span>
+        <div>
+          <strong>知行助教</strong>
+          <small>EduXJY · AIQandA</small>
+        </div>
+      </div>
+      <p class="story-kicker">课程资料驱动的教学智能体</p>
+      <h1>让每一个问题，<br>都能回到课程本身。</h1>
+      <p class="story-copy">
+        基于教师上传的讲义与教材，用自然语言回答问题，并把回答准确落到资料出处。
+        不是通用聊天，而是懂这门课的助教。
+      </p>
+      <ul class="story-points">
+        <li><span>01</span> 语义理解，支持口语化提问与追问</li>
+        <li><span>02</span> 多段资料综合，给出结构化讲解</li>
+        <li><span>03</span> 每条回答附带来源，减少无依据内容</li>
+      </ul>
+      <div class="story-foot">Django · Nginx · Gunicorn</div>
+    </section>
+
+    <section class="login-panel">
+      <div class="login-card">
+        <div class="login-heading">
+          <span class="eyebrow">Welcome back</span>
+          <h2>登录课程空间</h2>
+          <p>使用教师或学生账号继续。</p>
+        </div>
+
+        {% if form.errors %}
+          <div class="form-alert" role="alert">用户名或密码不正确，请重试。</div>
+        {% endif %}
+
+        <form method="post" class="login-form">
+          {% csrf_token %}
+          <div class="field">
+            <label for="{{ form.username.id_for_label }}">用户名</label>
+            {{ form.username }}
+          </div>
+          <div class="field">
+            <label for="{{ form.password.id_for_label }}">密码</label>
+            {{ form.password }}
+          </div>
+          {% if next %}
+            <input type="hidden" name="next" value="{{ next }}">
+          {% endif %}
+          <button type="submit" class="primary-button">进入课程空间 <span>→</span></button>
+        </form>
+
+        <p class="login-note">
+          登录后即可选择课程、提问并查看历史对话。
+          {% if user.is_staff %}<a href="{% url 'AIQandA:materials' %}">进入资料库</a>{% endif %}
+        </p>
+      </div>
+      <p class="login-copyright">EduXJY · 教学智能体课程设计</p>
+    </section>
+  </main>
+</body>
+</html>

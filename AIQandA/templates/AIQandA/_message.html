@@ -1,0 +1,52 @@
+{% load static %}
+<article class="message message-{{ message.role }}" data-message-id="{{ message.pk }}">
+  <div class="message-avatar {% if message.role == 'assistant' %}assistant-avatar{% else %}user-message-avatar{% endif %}">
+    {% if message.role == "assistant" %}知{% else %}{{ user.username|first|upper }}{% endif %}
+  </div>
+  <div class="message-body">
+    <div class="message-meta">
+      <strong>{% if message.role == "assistant" %}知行助教{% else %}{{ user.get_full_name|default:user.username }}{% endif %}</strong>
+      <span>{{ message.created_at|date:"H:i" }}</span>
+      {% if message.role == "assistant" %}
+        <span class="mode-badge {% if message.mode == 'fallback' %}mode-fallback{% endif %}">
+          {% if message.mode == "fallback" %}检索降级{% else %}AI 生成{% endif %}
+        </span>
+      {% endif %}
+    </div>
+    <div class="message-content">{{ message.content|linebreaksbr }}</div>
+
+    {% if message.role == "assistant" and message.citations.all %}
+      <details class="citations">
+        <summary>
+          <span class="citation-icon">⌕</span>
+          查看 {{ message.citations.all|length }} 条资料来源
+          <span class="summary-chevron">⌄</span>
+        </summary>
+        <div class="citation-list">
+          {% for citation in message.citations.all %}
+            <div class="citation-item">
+              <div class="citation-head">
+                <span class="citation-rank">[{{ citation.rank }}]</span>
+                <strong>{{ citation.chunk.document.title }}</strong>
+                {% if citation.chunk.page_number %}<span>第 {{ citation.chunk.page_number }} 页</span>{% endif %}
+                <span class="citation-score">相关度 {{ citation.score|floatformat:2 }}</span>
+              </div>
+              <p>{{ citation.quote }}</p>
+            </div>
+          {% endfor %}
+        </div>
+      </details>
+    {% endif %}
+
+    {% if message.role == "assistant" %}
+      <div class="feedback" data-message-id="{{ message.pk }}">
+        <span class="feedback-label">这个回答有帮助吗？</span>
+        <button type="button" class="feedback-button {% if message.feedback.rating == 'up' %}selected{% endif %}"
+                data-rating="up" aria-label="有帮助">有帮助</button>
+        <button type="button" class="feedback-button {% if message.feedback.rating == 'down' %}selected{% endif %}"
+                data-rating="down" aria-label="需改进">需改进</button>
+        <span class="feedback-note">{% if message.feedback %}已记录反馈{% endif %}</span>
+      </div>
+    {% endif %}
+  </div>
+</article>

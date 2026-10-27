@@ -1,0 +1,54 @@
+{% extends "AIQandA/base.html" %}
+{% block title %}课程资料{% endblock %}
+
+{% block content %}
+<section class="materials-page">
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">Teacher workspace</span>
+      <h2>课程资料库</h2>
+      <p>上传讲义后，系统会自动提取文本、切分片段并建立检索索引。</p>
+    </div>
+    <a class="primary-button inline-button" href="{% url 'AIQandA:material_upload' %}">＋ 上传资料</a>
+  </div>
+
+  {% if documents %}
+    <div class="table-card">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>资料</th>
+            <th>课程</th>
+            <th>状态</th>
+            <th>页数</th>
+            <th>片段</th>
+            <th>上传时间</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for document in documents %}
+            <tr>
+              <td>
+                <strong>{{ document.title }}</strong>
+                {% if document.error_message %}<small class="error-text">{{ document.error_message }}</small>{% endif %}
+              </td>
+              <td>{{ document.course.title }}</td>
+              <td><span class="status-badge status-{{ document.status }}">{{ document.get_status_display }}</span></td>
+              <td>{{ document.page_count }}</td>
+              <td>{{ document.chunk_count }}</td>
+              <td>{{ document.created_at|date:"Y-m-d H:i" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state empty-state-tall">
+      <div class="empty-icon">▤</div>
+      <h3>还没有课程资料</h3>
+      <p>上传第一份讲义，学生就可以开始基于资料提问。</p>
+      <a class="primary-button inline-button" href="{% url 'AIQandA:material_upload' %}">上传第一份资料</a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

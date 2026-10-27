@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+
+# Django
+.env
+.env.*
+!.env.example
+db.sqlite3
+db.sqlite3.*
+media/
+staticfiles/
+*.log
+
+# Tests and tools
+.pytest_cache/
+.pytest-tmp/
+pytest-of-*/
+pytest-cache-files-*/
+.acl-repair/
+.coverage
+.coverage.*
+htmlcov/
+.cache/
+.pylint.d/
+.mypy_cache/
+.ruff_cache/
+
+# Deployment and secrets
+.deploy/
+.secrets/
+report/
+*.pem
+*.key
+id_ed25519*
+
+# OS and editors
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+
+# Local temporary files
+.tmp/
+.pkgtest/
+.tools/

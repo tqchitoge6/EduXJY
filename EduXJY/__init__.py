@@ -1,0 +1,1 @@
+"""EduXJY project package."""

@@ -1,0 +1,104 @@
+{% load static %}
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="EduXJY 课程资料驱动的 AI 教学智能体">
+  <title>{% block title %}知行助教{% endblock %} · EduXJY</title>
+  <link rel="stylesheet" href="{% static 'AIQandA/css/app.css' %}">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <span class="brand-mark">知</span>
+        <div>
+          <strong>知行助教</strong>
+          <small>EduXJY · AIQandA</small>
+        </div>
+      </div>
+
+      <a class="new-chat" href="{% url 'AIQandA:chat' %}{% if selected_course %}?course={{ selected_course.pk }}&amp;new=1{% else %}?new=1{% endif %}">
+        <span>＋</span> 新对话
+      </a>
+
+      {% if courses %}
+      <form class="course-picker" method="get" action="{% url 'AIQandA:chat' %}">
+        <label for="course-select">当前课程</label>
+        <select id="course-select" name="course" onchange="this.form.submit()">
+          {% for course in courses %}
+            <option value="{{ course.pk }}" {% if selected_course and selected_course.pk == course.pk %}selected{% endif %}>
+              {{ course.title }}
+            </option>
+          {% endfor %}
+        </select>
+      </form>
+      {% endif %}
+
+      <div class="sidebar-label">最近对话</div>
+      <nav class="conversation-list" aria-label="最近对话">
+        {% for item in conversations %}
+          <a class="conversation-link {% if conversation and conversation.pk == item.pk %}active{% endif %}"
+             href="{% url 'AIQandA:chat' %}?course={{ item.course_id }}&amp;conversation={{ item.pk }}">
+            <span class="conversation-dot"></span>
+            <span class="conversation-title">{{ item.title|default:"未命名对话" }}</span>
+          </a>
+        {% empty %}
+          <p class="sidebar-empty">还没有对话，先问一个问题吧。</p>
+        {% endfor %}
+      </nav>
+
+      <div class="sidebar-spacer"></div>
+
+      {% if user.is_staff %}
+        <a class="sidebar-link" href="{% url 'AIQandA:materials' %}">
+          <span>▤</span> 课程资料
+        </a>
+      {% endif %}
+
+      <div class="user-box">
+        <span class="user-avatar">{{ user.username|first|upper }}</span>
+        <div class="user-meta">
+          <strong>{{ user.get_full_name|default:user.username }}</strong>
+          <small>{% if user.is_staff %}教师{% else %}学生{% endif %}</small>
+        </div>
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button class="icon-button" type="submit" title="退出登录" aria-label="退出登录">⏻</button>
+        </form>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="menu-button" type="button" id="menu-toggle" aria-label="打开菜单">☰</button>
+        <div class="topbar-title">
+          <span class="eyebrow">{% if page_kicker %}{{ page_kicker }}{% else %}课程知识问答{% endif %}</span>
+          <h1>{% if page_title %}{{ page_title }}{% elif selected_course %}{{ selected_course.title }}{% else %}知行助教{% endif %}</h1>
+        </div>
+        <div class="topbar-actions">
+          <span class="status-chip"><span class="pulse"></span> 资料驱动</span>
+          {% if user.is_staff %}
+            <a class="text-link" href="{% url 'AIQandA:material_upload' %}">上传资料</a>
+          {% endif %}
+        </div>
+      </header>
+
+      {% if messages %}
+        <div class="flash-stack" role="status">
+          {% for message in messages %}
+            <div class="flash flash-{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+  <script src="{% static 'AIQandA/js/app.js' %}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,104 @@
+{% extends "AIQandA/base.html" %}
+{% load static %}
+{% block title %}{% if selected_course %}{{ selected_course.title }}{% else %}课程问答{% endif %}{% endblock %}
+
+{% block content %}
+<section class="chat-page">
+  <div class="chat-intro">
+    <div>
+      <span class="eyebrow">Grounded Q&amp;A</span>
+      <h2>{% if selected_course %}{{ selected_course.title }}{% else %}课程知识问答{% endif %}</h2>
+      <p>
+        {% if selected_course %}
+          {{ selected_course.description|default:"回答只依据本课程资料，并标注引用来源。" }}
+        {% else %}
+          还没有课程资料，请联系教师创建课程并上传讲义。
+        {% endif %}
+      </p>
+    </div>
+    {% if selected_course %}
+      <div class="course-facts">
+        <span><strong>{{ selected_course.documents.count }}</strong> 份资料</span>
+        <span><strong>{{ selected_course.conversations.count }}</strong> 次对话</span>
+      </div>
+    {% endif %}
+  </div>
+
+  {% if not selected_course %}
+    <div class="empty-state empty-state-tall">
+      <div class="empty-icon">◌</div>
+      <h3>暂时没有可用课程</h3>
+      <p>请让教师登录后进入“课程资料”创建课程并上传讲义。</p>
+      {% if user.is_staff %}
+        <a class="primary-button inline-button" href="{% url 'AIQandA:material_upload' %}">去上传资料</a>
+      {% endif %}
+    </div>
+  {% else %}
+    <div class="chat-stage">
+      <div class="chat-scroll" id="chat-scroll"
+           data-conversation-id="{{ conversation.pk|default:'' }}"
+           data-course-id="{{ selected_course.pk }}"
+           data-course-title="{{ selected_course.title }}">
+        <div class="chat-date-line"><span>课程学习空间</span></div>
+
+        {% if not chat_messages %}
+          <div class="empty-state" id="empty-state">
+            <div class="empty-orbit">
+              <span class="orbit-core">知</span>
+              <span class="orbit-ring"></span>
+            </div>
+            <h3>今天想弄懂哪个概念？</h3>
+            <p>我会先检索这门课的讲义，再组织答案并附上出处。</p>
+            <div class="suggestion-grid">
+              {% for suggestion in suggestions %}
+                <button class="suggestion-card" type="button" data-question="{{ suggestion }}">
+                  <span class="suggestion-index">0{{ forloop.counter }}</span>
+                  <span>{{ suggestion }}</span>
+                  <span class="suggestion-arrow">↗</span>
+                </button>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+
+        {% for message in chat_messages %}
+          {% include "AIQandA/_message.html" with message=message %}
+        {% endfor %}
+      </div>
+
+      <div class="composer-wrap">
+        <form id="ask-form" class="composer" autocomplete="off">
+          {% csrf_token %}
+          <label class="sr-only" for="question-input">输入你的问题</label>
+          <textarea id="question-input" name="question" rows="1" maxlength="1000"
+                    placeholder="例如：监督学习和无监督学习有什么区别？"
+                    aria-describedby="composer-hint"></textarea>
+          <button type="submit" class="send-button" id="send-button" aria-label="发送问题">
+            <span>发送</span><span class="send-arrow">↑</span>
+          </button>
+        </form>
+        <p class="composer-hint" id="composer-hint">
+          <span>Enter 发送 · Shift + Enter 换行</span>
+          <span>AI 生成内容请结合课程资料核对</span>
+        </p>
+      </div>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+{% if selected_course %}
+<script>
+  window.AIQANDA = {
+    askUrl: "{% url 'AIQandA:ask' %}",
+    feedbackBase: "/api/messages/",
+    conversationId: "{{ conversation.pk|default:'' }}",
+    courseId: "{{ selected_course.pk }}",
+    courseTitle: "{{ selected_course.title|escapejs }}",
+    userInitial: "{{ user.username|first|upper|escapejs }}"
+  };
+</script>
+<script src="{% static 'AIQandA/js/chat.js' %}"></script>
+{% endif %}
+{% endblock %}
