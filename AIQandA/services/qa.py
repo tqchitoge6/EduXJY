@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Sequence
 
@@ -50,7 +51,7 @@ def answer_question(
             chunk_id=item.chunk.id,
             document_title=item.chunk.document.title,
             page_number=item.chunk.page_number,
-            quote=" ".join(item.chunk.content.split())[:MAX_QUOTE_CHARS],
+            quote=re.sub(r"#{1,6}\s*", "", " ".join(item.chunk.content.split()))[:MAX_QUOTE_CHARS],
             score=round(item.score, 4),
         )
         for index, item in enumerate(chunks, start=1)

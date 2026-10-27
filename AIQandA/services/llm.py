@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 import time
 from dataclasses import dataclass
 from typing import Sequence
@@ -63,6 +64,15 @@ def _format_history(history: Sequence[Message]) -> list[dict[str, str]]:
     return messages
 
 
+def _clean_excerpt(text: str) -> str:
+    """Make a retrieved Markdown excerpt readable in a plain-text answer."""
+    cleaned = re.sub(r"#{1,6}\s*", "", text)
+    cleaned = re.sub(r"\*\*(.+?)\*\*", r"\1", cleaned)
+    cleaned = re.sub(r"\s*\|\s*", " ", cleaned)
+    cleaned = re.sub(r"-{3,}", " ", cleaned)
+    return " ".join(cleaned.split())
+
+
 def _fallback_text(chunks: Sequence[RetrievedChunk], reason: str) -> str:
     if not chunks:
         return "课程资料中暂未找到与这个问题相关的内容。请换一种问法，或请教师补充资料。"
@@ -70,7 +80,7 @@ def _fallback_text(chunks: Sequence[RetrievedChunk], reason: str) -> str:
     for index, item in enumerate(chunks[:2], start=1):
         document = item.chunk.document
         page = f"，第 {item.chunk.page_number} 页" if item.chunk.page_number else ""
-        quote = " ".join(item.chunk.content.split())[:MAX_QUOTE_CHARS]
+        quote = _clean_excerpt(item.chunk.content)[:MAX_QUOTE_CHARS]
         lines.append(f"\n[{index}] 《{document.title}》{page}\n{quote}")
     lines.append("\n配置在线模型后，系统会在这些资料的基础上生成更完整的讲解。")
     return "\n".join(lines)

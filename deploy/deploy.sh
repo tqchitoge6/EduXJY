@@ -36,14 +36,13 @@ if command -v apt-get >/dev/null 2>&1; then
   apt-get install -y python3 python3-venv python3-pip nginx git make
   NGINX_SITE="/etc/nginx/sites-available/eduxjy"
   NGINX_LINK="/etc/nginx/sites-enabled/eduxjy"
-  NGINX_GROUP="www-data"
-  SERVICE_GROUP="www-data"
+  SERVICE_GROUP="eduxjy"
 elif command -v dnf >/dev/null 2>&1; then
   dnf install -y python3 python3-pip nginx git make
   NGINX_SITE="/etc/nginx/conf.d/eduxjy.conf"
   NGINX_LINK=""
   NGINX_GROUP="nginx"
-  SERVICE_GROUP="nginx"
+  SERVICE_GROUP="eduxjy"
 else
   echo "Unsupported package manager; install Python 3.10+, nginx, git, make manually." >&2
   exit 1
@@ -62,7 +61,6 @@ sudo -u "$APP_USER" -H "$APP_DIR/.venv/bin/python" "$APP_DIR/manage.py" collects
 sudo -u "$APP_USER" -H "$APP_DIR/.venv/bin/python" "$APP_DIR/manage.py" seed_demo
 
 install -m 644 "$APP_DIR/deploy/eduxjy.service" /etc/systemd/system/eduxjy.service
-sed -i "s/^Group=www-data$/Group=${SERVICE_GROUP}/" /etc/systemd/system/eduxjy.service
 systemctl daemon-reload
 systemctl enable eduxjy
 systemctl restart eduxjy

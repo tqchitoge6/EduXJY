@@ -24,6 +24,8 @@ staticfiles/
 pytest-of-*/
 pytest-cache-files-*/
 .acl-repair/
+.dsh-office-*/
+.vscode-web/
 .coverage
 .coverage.*
 htmlcov/

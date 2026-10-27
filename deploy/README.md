@@ -130,7 +130,7 @@ systemctl enable --now eduxjy
 systemctl status eduxjy --no-pager
 ```
 
-Ubuntu 使用 `Group=www-data`；RHEL 系将 service 中的组改为 `nginx`。
+服务以 `eduxjy` 用户运行，静态文件权限为 755/644，Nginx 可以直接读取；不需要按发行版修改运行组。
 
 检查只监听本机：
 
